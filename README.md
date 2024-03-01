@@ -61,3 +61,6 @@ Il contient la clé privée non chiffrée, et utilise l'implémentation `OpenSSH
 Le scénario caractéristique est la distribution d'applications shell simples sur des serveurs SSH sans augmenter la surface d'attaque.
 Ce script `ssh_servlet_setup` permet de créer facilement et de déployer en une seule commande la paire de clés unique, le client et la servlet.
 
+## Sécurité
+Le cas d'usage privilégié est la distribution de processus automatisés ne nécessitant de passphrase fournie par un opérateur, c'est pourquoi la clé privée peut être non chiffrée.
+Le client vérifie a minima que ses permissions sont restreintes à l'utilisateur propriétaire, ce qui est acceptable dans un environnement Unix.
