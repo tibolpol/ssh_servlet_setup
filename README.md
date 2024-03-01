@@ -4,6 +4,10 @@ Le mapping est accompli par le paramètre `authorized_keys command` sur le compt
 Le client est déployé sous forme de script, exécutable par `bash` ou par `DOS cmd`.
 Il contient la clé privée non chiffrée, et utilise l'implémentation `OpenSSH` ou `plink`.
 
+```
+[private_key] >> ssh|plink >> user@host:authorized_keys[public_key] >> command $args
+```
+
 ## Scénario
 Le scénario caractéristique est la distribution d'applications shell simples sur des serveurs SSH sans augmenter la surface d'attaque.
 Ce script `ssh_servlet_setup` permet de créer facilement et de déployer en une seule commande la paire de clés unique, le client et la servlet.
