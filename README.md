@@ -22,7 +22,7 @@ DESCRIPTION
       user@host:.ssh/servlet_command.
 
     Si la servlet doit lire l'entrée standard, il faudra ensuite éditer
-    le client et supprimer l'option -n dans la commande ssh.
+    le script client et supprimer l'option -n dans la commande ssh.
 
     Exemple :
 

@@ -38,7 +38,7 @@ $(_ "DESCRIPTION")
     - $(_ "le script est lu sur l'entrée standard et copié dans")
       user@host:.ssh/servlet_command.
 
-    $(_ "Si la servlet doit lire l'entrée standard, il faudra ensuite éditer le client et supprimer l'option") -n $(_ "dans la commande") ssh.
+    $(_ "Si la servlet doit lire l'entrée standard, il faudra ensuite éditer le script client et supprimer l'option") -n $(_ "dans la commande") ssh.
 
     $(_ "Exemple") :
 
