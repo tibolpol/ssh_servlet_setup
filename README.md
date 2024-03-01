@@ -50,3 +50,14 @@ AUTEURS
 
 ssh_servlet_setup(1)                                  ssh_servlet_setup(1)
 ```
+# SSH Servlet ?
+## Présentation
+Une servlet SSH est l'association d'une clé et d'un script déployé sur un compte utilisateur d'un serveur SSH.
+Le mapping est accompli par le paramètre `authorized_keys command` sur le compte utilisateur du serveur associé à la clé publique.
+Le client est déployé sous forme de script, exécutable par `bash` ou par `DOS cmd`.
+Il contient la clé privée non chiffrée, et utilise l'implémentation `OpenSSH` ou `plink`.
+
+## Scénario
+Le scénario caractéristique est la distribution d'applications shell simples sur des serveurs SSH sans augmenter la surface d'attaque.
+Ce script `ssh_servlet_setup` permet de créer facilement et de déployer en une seule commande la paire de clés unique, le client et la servlet.
+
