@@ -1,0 +1,158 @@
+#!/bin/bash
+# $1 : URL servlet à installer de la forme user@host:command
+# <stdin : source du script à installer dans user@host:.ssh/servlet_command
+# >./command.cmd : script client généré
+mydir=$(dirname "$0")
+myname=$(basename "$0")
+myexit(){
+  rc=$1;shift
+  echo $myname rc=$rc - $* >&2
+  exit $rc
+}
+_(){ TEXTDOMAIN=beyn TEXTDOMAINDIR="$(readlink -f "$mydir/locale")" gettext "$1"; }
+
+while (( $# > 0 ));do #{
+zis=$1;shift
+if   [[ $zis == -h ]];then
+#
+# Option -h (help)
+#
+fmt -s <<END
+$myname(1)                                  $myname(1)
+
+$(_ "NOM")
+        $myname -  $(_ "Installe une servlet ssh et son client").
+
+$(_ "SYNOPSIS")
+        $myname [-h] | user@host:command
+
+$(_ "DESCRIPTION")
+        $myname user@host:command
+        $(_ "installe le client") ./command.cmd $(_ "et la servlet") ssh user@host:.ssh/servlet_command.
+
+        - $(_ "un client est créé localement sous le nom") ./command.cmd,
+        - $(_ "une paire de clés est générée"),
+        - $(_ "la clé privée est incluse dans le client"),
+        - $(_ "la clé publique est incluse dans")
+          user@host:.ssh/authorized_keys,
+        - $(_ "le script est lu sur l'entrée standard et copié dans")
+          user@host:.ssh/servlet_command.
+
+        $(_ "Si la servlet doit lire l'entrée standard, il faudra ensuite éditer le client et supprimer l'option") -n $(_ "dans la commande") ssh.
+
+        $(_ "Exemple") :
+
+        $myname $LOGNAME@localhost:mytest <<< hostname
+
+$(_ "OPTIONS")
+        -h
+            $(_ "Aide")
+
+$(_ "STATUT FINAL")
+        0 SUCCESS
+            $(_ "Succès").
+
+        4 ERROR
+            $(_ "Une erreur est signalée").
+
+$(_ "VOIR AUSSI")
+        ssh(1) authorized_keys(5) ssh-keygen(1)
+
+$(_ "AUTEURS")
+        AeBS Algeria e-Banking Services www.aebs-tech.com
+$(_ "Leader de l'intégration de solutions bancaires multi-canal en Algérie").
+
+$myname(1)                                  $myname(1)
+END
+exit
+else arg+=("$zis")
+fi
+done #}
+
+IFS=':' read p2 p3 <<< "$arg" &&
+IFS='@' read user host <<< "$p2" &&
+[ -n "$user" -a -n "$host" ] || myexit 4 "user@host $(_ "incomplet")" &&
+
+dir=.ssh
+command="$(basename "$p3")" &&
+if [[ $arg != $user@$host:$command ]];then myexit 4 "parsed: $user@$host:$command" ; fi &&
+
+tmp=$(mktemp -d) &&
+trap 'rm -rf $tmp' EXIT &&
+
+# une paire de clés est générée
+ssh-keygen -f $tmp/key -b 2048 -q -N "" -C "$arg" &&
+
+# le client est créé localement sous le nom ./command.cmd
+# la clé privée est incluse dans le client
+# package requis putty-tools
+cat > "$command.cmd" << END &&
+@ 2>/dev/null # 2>NUL & ECHO OFF & GOTO :WINDOWS
+# https://stackoverflow.com/questions/17510688/single-script-to-run-in-both-windows-batch-and-linux-bash
+
+# $(_ "Client de la servlet") $user@$host:.ssh/servlet_$command
+# $(_ "généré par") $myname
+# $(_ "associé à la clé publique dans") $user@$host:.ssh/authorized_keys
+# $(_ "empreinte de la clé") :
+# $(ssh-keygen -l -E md5 -f $tmp/key)
+(( \$(stat -c%a "\$0") % 100 )) && { echo "Ce script doit être protégé par chmod go= \$0";exit 4; } # On peut désactiver ce contrôle
+trap 'rm -rf \$tmp' EXIT
+tmp=\$(mktemp -d)
+unset SSH_AUTH_SOCK
+(umask u=r,g=,o=
+cat > \$tmp/key <<< "$(cat $tmp/key)")
+# $(_ "Supprimer l'option") -n $(_ "si la servlet consomme") stdin
+ssh -n -T -C -oPasswordAuthentication=no -i \$tmp/key "$user@$host" -- "\$@"
+exit \$?
+
+:WINDOWS
+REM $(_ "Client de la servlet") $user@$host:.ssh/servlet_$command
+REM $(_ "généré par") $myname
+REM $(_ "associé à la clé publique dans") $user@$host:.ssh/authorized_keys
+REM $(_ "empreinte de la clé") :
+REM $(ssh-keygen -l -E md5 -f $tmp/key)
+REM Ne pas retoucher les trois fin de ligne ci-dessous
+SET LF=^
+
+
+SETLOCAL EnableDelayedExpansion
+$(puttygen $tmp/key -O private -o /dev/stdout | sed 's/.*/SET KEY=!KEY!&!LF!/' | todos)
+ECHO !KEY! >"%temp%\key.ppk"
+ENDLOCAL
+REM https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe
+plink $user@$host -i %temp%\key.ppk -T -C -batch %*
+END
+chmod u+x,go= "$command.cmd" &&
+
+# l'utilisateur se connecte en tant que user@host
+# l'entrée est copiée dans user@host:.ssh/servlet_$command
+# la clé publique est incluse dans user@host:.ssh/authorized_keys
+ssh "$user@$host" "override=$override"' &&
+mkdir -p .ssh &&
+chmod go= .ssh &&
+( ! [ -f "'".ssh/servlet_$command"'" ] || [[ $override == yes ]] || ( echo "$LOGNAME@$HOSTNAME:'".ssh/servlet_$command $(_ "existe déjà, spécifier") override=yes $myname $arg"'" >&2; false)) &&
+cat > "'".ssh/servlet_$command"'" &&
+chmod +x "'".ssh/servlet_$command"'" &&
+if [[ $override == yes ]];then  sed -i "'"s|.ssh/servlet_$command|echo was overridden &|"'" .ssh/authorized_keys ; fi &&
+echo "restrict,command=\"'".ssh/servlet_$command"' \$SSH_ORIGINAL_COMMAND\" '$(cat $tmp/key.pub)'" >> .ssh/authorized_keys &&
+chmod go-w .ssh/authorized_keys' &&
+
+cat << END
+$(_ "La servlet a été installée sur") $user@$host:.ssh/servlet_$command
+$(_ "Le client") $PWD/$command $(_ "a été généré")
+
+$(_ "Supprimer l'option") -n $(_ "dans la commande") ssh $(_ "si la servlet consomme") stdin
+sed -i 's/ssh -n/ssh/' $command.cmd
+
+./$command.cmd # check
+
+cat $command.cmd  # show
+ssh $user@$host cat ".ssh/servlet_$command" # show
+ssh $user@$host tail .ssh/authorized_keys # show
+
+ssh $user@$host sed -i '/:$command\$/d' .ssh/authorized_keys # cleanup
+./$command.cmd # check error
+
+rm -f $command.cmd # cleanup
+ssh $user@$host rm -f ".ssh/servlet_$command" # cleanup
+END
