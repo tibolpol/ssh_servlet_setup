@@ -11,6 +11,10 @@ Ce script `ssh_servlet_setup` permet de créer facilement et de déployer en une
 ## Sécurité
 Le cas d'usage privilégié est la distribution de processus automatisés ne nécessitant pas de passphrase fournie par un opérateur, c'est pourquoi la clé privée peut être non chiffrée.
 Le client vérifie a minima que ses permissions sont restreintes à l'utilisateur propriétaire, ce qui est acceptable dans un environnement Unix.
+La surface d'attaque du serveur est réduite à la clé ne désignant que la commande sctricement nécessaire.
+
+### TODO
+Ajouter un parsing des arguments pour intercepter l'injection de shell.
 
 ## ssh_servlet_setup Installe une servlet ssh et son client
 ```
