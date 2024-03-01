@@ -21,50 +21,60 @@ fmt -s <<END
 $myname(1)                                  $myname(1)
 
 $(_ "NOM")
-        $myname -  $(_ "Installe une servlet ssh et son client").
+    $myname -  $(_ "Installe une servlet ssh et son client").
 
 $(_ "SYNOPSIS")
-        $myname [-h] | user@host:command
+    $myname [-h|u] | | user@host:command
 
 $(_ "DESCRIPTION")
-        $myname user@host:command
-        $(_ "installe le client") ./command.cmd $(_ "et la servlet") ssh user@host:.ssh/servlet_command.
+    $myname user@host:command
+    $(_ "installe le client") ./command.cmd $(_ "et la servlet") ssh user@host:.ssh/servlet_command.
 
-        - $(_ "un client est créé localement sous le nom") ./command.cmd,
-        - $(_ "une paire de clés est générée"),
-        - $(_ "la clé privée est incluse dans le client"),
-        - $(_ "la clé publique est incluse dans")
-          user@host:.ssh/authorized_keys,
-        - $(_ "le script est lu sur l'entrée standard et copié dans")
-          user@host:.ssh/servlet_command.
+    - $(_ "un client est créé localement sous le nom") ./command.cmd,
+    - $(_ "une paire de clés est générée"),
+    - $(_ "la clé privée est incluse dans le client"),
+    - $(_ "la clé publique est incluse dans")
+      user@host:.ssh/authorized_keys,
+    - $(_ "le script est lu sur l'entrée standard et copié dans")
+      user@host:.ssh/servlet_command.
 
-        $(_ "Si la servlet doit lire l'entrée standard, il faudra ensuite éditer le client et supprimer l'option") -n $(_ "dans la commande") ssh.
+    $(_ "Si la servlet doit lire l'entrée standard, il faudra ensuite éditer le client et supprimer l'option") -n $(_ "dans la commande") ssh.
 
-        $(_ "Exemple") :
+    $(_ "Exemple") :
 
-        $myname $LOGNAME@localhost:mytest <<< hostname
+    $myname $LOGNAME@localhost:mytest <<< hostname
 
 $(_ "OPTIONS")
-        -h
-            $(_ "Aide")
+    -h
+        $(_ "Aide")
+
+    -u
+        $(_ "Update ce script avec la branche") master.
 
 $(_ "STATUT FINAL")
-        0 SUCCESS
-            $(_ "Succès").
+    0 SUCCESS
+        $(_ "Succès").
 
-        4 ERROR
-            $(_ "Une erreur est signalée").
+    4 ERROR
+        $(_ "Une erreur est signalée").
 
 $(_ "VOIR AUSSI")
-        ssh(1) authorized_keys(5) ssh-keygen(1)
+    ssh(1) authorized_keys(5) ssh-keygen(1)
 
 $(_ "AUTEURS")
-        AeBS Algeria e-Banking Services www.aebs-tech.com
-$(_ "Leader de l'intégration de solutions bancaires multi-canal en Algérie").
+    tlp(at)laposte(dot)net
 
 $myname(1)                                  $myname(1)
 END
 exit
+
+elif [[ $zis == -u ]];then # update
+[ -w "$0" ] || myexit 8 $(_ "Écriture impossible sur le fichier") $0
+tmp=$(mktemp)
+wget -O $tmp https://raw.githubusercontent.com/tibolpol/ssh_servlet_setup/main/ssh_servlet_setup &&
+echo "$(_ "Le script") $0 $(_ "a été mis à jour")" >&2 &&
+exec cat $tmp > "$0"
+
 else arg+=("$zis")
 fi
 done #}
