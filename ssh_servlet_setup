@@ -152,17 +152,17 @@ $(_ "La servlet a été installée sur") $user@$host:.ssh/servlet_$command
 $(_ "Le client") $PWD/$command $(_ "a été généré")
 
 $(_ "Supprimer l'option") -n $(_ "dans la commande") ssh $(_ "si la servlet consomme") stdin
-sed -i 's/ssh -n/ssh/' $command.cmd
+sed -i 's/ssh -n/ssh/' $PWD/$command.cmd
 
-./$command.cmd # check
+$PWD/$command.cmd # check
 
-cat $command.cmd  # show
+cat $PWD/$command.cmd  # show
 ssh $user@$host cat ".ssh/servlet_$command" # show
 ssh $user@$host tail .ssh/authorized_keys # show
 
 ssh $user@$host sed -i '/:$command\$/d' .ssh/authorized_keys # cleanup
-./$command.cmd # check error
+$PWD/$command.cmd # check error
 
-rm -f $command.cmd # cleanup
+rm -f $PWD/$command.cmd # cleanup
 ssh $user@$host rm -f ".ssh/servlet_$command" # cleanup
 END

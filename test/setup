@@ -1,8 +1,21 @@
 #!/bin/bash
 mydir="$(cd "$(dirname "$0")"&&pwd)"
 
+# setup Linux / OpenSSH
+type ssh-keygen || apt install openssh-client
+
 # setup host key
 ssh -oPasswordAuthentication=no nobody@localhost
+
+# necessary packages (debian)
+type puttygen || sudo apt install putty-tools
+type wine     || sudo apt install wine
+
+# external packages (wine)
+echo '@echo off
+for %%X in (%*) do (set FOUND=%%~$PATH:X)
+if defined FOUND (echo Y)' | todos >/tmp/x.cmd
+[[ .$(wine /tmp/x.cmd plink.exe|fromdos) == .Y ]] || wget https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe
 
 # setup host key
 wine plink -pw _ nobody@localhost
