@@ -1,0 +1,8 @@
+#!/bin/bash
+mydir="$(cd "$(dirname "$0")"&&pwd)"
+
+# setup host key
+ssh -oPasswordAuthentication=no nobody@localhost
+
+# setup host key
+wine plink -pw _ nobody@localhost

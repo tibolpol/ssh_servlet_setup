@@ -1,0 +1,9 @@
+#!/bin/bash
+mydir=$(dirname $0)
+
+# setup servlet_mytest
+cd /tmp/ && override=yes "$mydir"/../ssh_servlet_setup $LOGNAME@localhost:mytest <<< $'#!/bin/bash\necho $*'
+
+/tmp/mytest.cmd hello
+
+wine /tmp/mytest.cmd hello wine
